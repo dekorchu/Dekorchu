@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEKORCHU</title>
+<style>
+:root{--bg:#0b0b10;--panel:#14141c;--gold:#d4af37;--text:#f5f5f5}
+*{box-sizing:border-box;font-family:Segoe UI,Arial}
+body{margin:0;background:var(--bg);color:var(--text)}
+.pattern{position:fixed;inset:0;background:radial-gradient(circle at 20% 30%, rgba(212,175,55,.12), transparent 40%),repeating-linear-gradient(45deg, rgba(212,175,55,.06), rgba(212,175,55,.06) 1px, transparent 1px, transparent 50px);animation:bg 40s linear infinite;z-index:-1}
+@keyframes bg{to{background-position:800px 800px}}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 26px;border-bottom:1px solid #222}
+.logo{font-size:36px;font-weight:800;color:var(--gold)}
+nav button{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:8px 14px;margin-left:10px;border-radius:8px;cursor:pointer}
+nav button:hover{background:var(--gold);color:#000}
+.container{max-width:520px;margin:40px auto;background:var(--panel);padding:26px;border-radius:16px;box-shadow:0 0 25px rgba(0,0,0,.6)}
+.hidden{display:none}
+input,select,textarea{width:100%;margin-top:10px;padding:12px;border-radius:10px;background:#101018;border:1px solid #333;color:white}
+button.main{width:100%;margin-top:18px;padding:15px;background:var(--gold);color:#000;border:none;border-radius:12px;font-size:16px;cursor:pointer}
+.room{margin-top:14px;padding:14px;background:#1b1b26;border-radius:12px}
+.wall{margin-top:8px;padding:8px;background:#20202b;border-radius:8px;font-size:14px}
+.small-btn{margin-top:8px;background:transparent;border:1px solid var(--gold);color:var(--gold);padding:6px 10px;border-radius:6px;cursor:pointer}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+</style>
+</head>
+<body>
+<div class="pattern"></div>
+<header>
+<div class="logo">DEKORCHU</div>
+<nav>
+<button onclick="show('order')">Sipariş</button>
+<button onclick="show('adminLogin')">Yönetici</button>
+</nav>
+</header>
+<div class="container" id="order">
+<h2>Müşteri Bilgileri</h2>
+<input id="custName" placeholder="Ad Soyad">
+<input id="custPhone" placeholder="Telefon (5XXXXXXXXX)" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+<button class="main" onclick="goHouse()">Devam Et</button>
+</div>
+<div class="container hidden" id="house">
+<h2>Evin Kaç Artı Bir?</h2>
+<select id="houseType" onchange="loadRooms()">
+<option value="">Seçiniz</option><option>1+1</option><option>2+1</option><option>2.5+1</option><option>3+1</option><option>3.5+1</option><option>4.5+1</option>
+</select>
+<div id="rooms"></div>
+<textarea id="orderNote" placeholder="Genel Sipariş Notu"></textarea>
+<button class="main" onclick="saveOrder()">Siparişi Kaydet</button>
+</div>
+<div class="container hidden" id="adminLogin">
+<h2>Yönetici Girişi</h2>
+<input id="adminUser" placeholder="Kullanıcı adı">
+<input id="adminPass" type="password" placeholder="Şifre">
+<button class="main" onclick="adminLogin()">Giriş</button>
+</div>
+<div class="container hidden" id="admin">
+<div class="admin-grid">
+<div>
+<h2>Katalog Yönetimi</h2>
+<input id="catalogName" placeholder="Katalog Adı">
+<button class="main" onclick="addCatalog()">Katalog Ekle</button>
+<div id="catalogList"></div>
+</div>
+<div>
+<h2>Geçmiş Siparişler</h2>
+<div id="orderHistory"></div>
+</div>
+</div>
+</div>
+<script>
+let catalogs=JSON.parse(localStorage.getItem('catalogs')||'[]');
+let orders=JSON.parse(localStorage.getItem('orders')||'[]');
+let currentRooms=[];
+function show(id){document.querySelectorAll('.container').forEach(c=>c.classList.add('hidden'));document.getElementById(id).classList.remove('hidden')}
+function goHouse(){if(!custName.value||custPhone.value.length!==10||!custPhone.value.startsWith('5'))return alert('Bilgiler hatalı');show('house')}
+function loadRooms(){rooms.innerHTML='';currentRooms=[];const map={'1+1':['Salon','Mutfak','Banyo'],'2+1':['Salon','Yatak Odası','Çocuk Odası','Mutfak','Banyo'],'2.5+1':['Salon','Yatak Odası','Çocuk Odası','Misafir Odası','Mutfak','Banyo'],'3+1':['Salon','Yatak Odası','Çocuk Odası','Misafir Odası','Mutfak','Banyo'],'3.5+1':['Salon','Yatak Odası','Çocuk Odası','Misafir Odası','Çalışma Odası','Mutfak','Banyo','Ebeveyn Banyosu'],'4.5+1':['Salon','Yatak Odası','Çocuk Odası','Çocuk Odası 2','Misafir Odası','Çalışma Odası','Mutfak','Banyo','Ebeveyn Banyosu']};if(!houseType.value)return;map[houseType.value].forEach(r=>{const room={name:r,walls:[]};currentRooms.push(room);const d=document.createElement('div');d.className='room';d.innerHTML=`<strong>${r}</strong><div class="walls"></div><button class="small-btn">+ Duvar Ekle</button>`;d.querySelector('button').onclick=()=>addWall(room,d.querySelector('.walls'));rooms.appendChild(d)})}
+function addWall(room,container){if(room.walls.length>=4)return alert('En fazla 4 duvar');const wall={catalog:'',code:''};room.walls.push(wall);const d=document.createElement('div');d.className='wall';d.innerHTML=`Duvar ${room.walls.length}<select>${catalogs.map(c=>`<option>${c}</option>`).join('')}</select><input placeholder="Kağıt Kodu">`;const sel=d.querySelector('select');const inp=d.querySelector('input');sel.onchange=()=>wall.catalog=sel.value;inp.oninput=()=>wall.code=inp.value;container.appendChild(d)}
+function saveOrder(){orders.push({name:custName.value,phone:custPhone.value,note:orderNote.value,rooms:currentRooms,date:new Date().toLocaleString()});localStorage.setItem('orders',JSON.stringify(orders));alert('Sipariş kaydedildi');location.reload()}
+function adminLogin(){if(adminUser.value==='yönetici'&&adminPass.value==='dekorchu'){show('admin');renderCatalogs();renderOrders()}else alert('Hatalı giriş')}
+function addCatalog(){if(!catalogName.value||catalogs.includes(catalogName.value))return;catalogs.push(catalogName.value);localStorage.setItem('catalogs',JSON.stringify(catalogs));renderCatalogs()}
+function renderCatalogs(){catalogList.innerHTML='';catalogs.forEach((c,i)=>{catalogList.innerHTML+=`<div class="room">${c} <button class="small-btn" onclick="deleteCatalog(${i})">Sil</button></div>`})}
+function deleteCatalog(i){catalogs.splice(i,1);localStorage.setItem('catalogs',JSON.stringify(catalogs));renderCatalogs()}
+function renderOrders(){orderHistory.innerHTML='';orders.forEach(o=>{let html=`<div class="room"><strong>${o.name}</strong> (${o.phone})<br><small>${o.date}</small>`;o.rooms.forEach(r=>{html+=`<div class="wall"><b>${r.name}</b>`;r.walls.forEach((w,i)=>{html+=`<div>Duvar ${i+1}: ${w.catalog} / ${w.code}</div>`});html+='</div>'});if(o.note)html+=`<div class="wall">Not: ${o.note}</div>`;html+='</div>';orderHistory.innerHTML+=html})}
+</script>
+</body>
+</html>
