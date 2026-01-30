@@ -2,78 +2,92 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DEKORCHU</title>
-
+<title>Dekorchu Sipariş</title>
 <style>
-:root{
-  --bg:#0b0b10;
-  --panel:#14141c;
-  --gold:#d4af37;
-  --text:#f5f5f5;
+*{box-sizing:border-box;font-family:Arial}
+body{
+  margin:0;
+  background:#0f0f0f;
+  color:#fff;
+  overflow-x:hidden;
 }
-*{box-sizing:border-box;font-family:Segoe UI,Arial}
-body{margin:0;background:var(--bg);color:var(--text);}
-
-.pattern{
+.bg{
   position:fixed;inset:0;
   background:
-    radial-gradient(circle at 20% 30%, rgba(212,175,55,.12), transparent 40%),
-    repeating-linear-gradient(45deg, rgba(212,175,55,.05), rgba(212,175,55,.05) 1px, transparent 1px, transparent 60px);
-  animation:bg 60s linear infinite;
+    radial-gradient(circle at 20% 20%,rgba(255,215,0,.12),transparent 40%),
+    radial-gradient(circle at 80% 80%,rgba(255,215,0,.08),transparent 40%);
+  animation:move 20s linear infinite;
   z-index:-1;
 }
-@keyframes bg{to{background-position:1000px 1000px}}
-
+@keyframes move{
+  0%{transform:translate(0,0)}
+  50%{transform:translate(-40px,30px)}
+  100%{transform:translate(0,0)}
+}
 header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:18px 26px;border-bottom:1px solid #222;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 25px;
 }
 .logo{
-  font-size:36px;font-weight:800;color:var(--gold);
-  animation:glow 3s ease-in-out infinite;
+  font-size:34px;
+  font-weight:bold;
+  color:#FFD700;
+  animation:glow 2s infinite alternate;
 }
 @keyframes glow{
-  0%,100%{text-shadow:0 0 15px var(--gold)}
-  50%{text-shadow:0 0 35px var(--gold)}
+  from{text-shadow:0 0 5px #FFD700}
+  to{text-shadow:0 0 20px #FFD700}
 }
 nav button{
-  background:transparent;border:1px solid var(--gold);
-  color:var(--gold);padding:8px 14px;
-  margin-left:10px;border-radius:8px;cursor:pointer;
-}
-nav button:hover{background:var(--gold);color:#000}
-
-.container{
-  max-width:520px;margin:40px auto;
-  background:var(--panel);padding:26px;
-  border-radius:16px;box-shadow:0 0 25px rgba(0,0,0,.6);
-}
-.hidden{display:none}
-
-input,select,textarea{
-  width:100%;margin-top:10px;padding:12px;
-  border-radius:10px;background:#101018;
-  border:1px solid #333;color:white;
-}
-button.main{
-  width:100%;margin-top:18px;padding:15px;
-  background:var(--gold);color:#000;
-  border:none;border-radius:12px;font-size:16px;
+  background:none;
+  border:1px solid #FFD700;
+  color:#FFD700;
+  padding:8px 14px;
+  border-radius:8px;
+  margin-left:10px;
   cursor:pointer;
 }
-.room{margin-top:14px;padding:14px;background:#1b1b26;border-radius:12px}
-.wall{margin-top:8px;padding:8px;background:#20202b;border-radius:8px}
-.small-btn{
-  margin-top:8px;background:transparent;border:1px solid var(--gold);
-  color:var(--gold);padding:6px 10px;border-radius:6px;cursor:pointer;
+section{display:none;padding:25px}
+section.active{display:block}
+.card{
+  background:#1a1a1a;
+  padding:20px;
+  border-radius:12px;
+  max-width:900px;
+  margin:auto;
 }
-.small-btn:hover{background:var(--gold);color:#000}
+input,select,textarea{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:none;
+}
+button.main{
+  background:linear-gradient(45deg,#FFD700,#ffea80);
+  border:none;
+  padding:12px 18px;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 0 15px rgba(255,215,0,.6);
+}
+.list{display:flex;gap:20px}
+.list > div{flex:1}
+.item{
+  padding:10px;
+  border-bottom:1px solid #333;
+  cursor:pointer;
+}
+.item:hover{background:#222}
+.small{font-size:13px;color:#bbb}
 </style>
 </head>
 
 <body>
-<div class="pattern"></div>
+<div class="bg"></div>
 
 <header>
   <div class="logo">DEKORCHU</div>
@@ -84,122 +98,142 @@ button.main{
 </header>
 
 <!-- SİPARİŞ -->
-<div class="container" id="order">
-  <h2>Müşteri Bilgileri</h2>
-  <input id="custName" placeholder="Ad Soyad">
-  <input id="custPhone" placeholder="Telefon (5XXXXXXXXX – başına 0 yazmayın)"
-    maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-  <button class="main" onclick="goHouse()">Devam Et</button>
-</div>
+<section id="order" class="active">
+  <div class="card">
+    <h2>Müşteri Bilgileri</h2>
+    <input id="name" placeholder="Ad Soyad">
+    <input id="phone" placeholder="5XXXXXXXXX">
+    <button class="main" onclick="nextRoom()">Devam Et</button>
+  </div>
+</section>
 
-<!-- EV -->
-<div class="container hidden" id="house">
-  <h2>Evin Kaç Artı Bir?</h2>
-  <select id="houseType" onchange="loadRooms()">
-    <option value="">Seçiniz</option>
-    <option>1+1</option><option>2+1</option><option>2.5+1</option>
-    <option>3+1</option><option>3.5+1</option><option>4.5+1</option>
-  </select>
-  <div id="rooms"></div>
-  <textarea id="orderNote" placeholder="Genel Sipariş Notu"></textarea>
-  <button class="main" onclick="saveOrder()">Siparişi Kaydet</button>
-</div>
+<!-- ODA -->
+<section id="room">
+  <div class="card">
+    <h2>Oda Seç</h2>
+    <select id="roomSel" onchange="loadWalls()">
+      <option value="">Seçiniz</option>
+      <option>Salon</option>
+      <option>Yatak Odası</option>
+      <option>Çocuk Odası</option>
+      <option>Mutfak</option>
+      <option>Banyo</option>
+      <option>Ebeveyn Banyosu</option>
+    </select>
+    <div id="walls"></div>
+    <textarea id="note" placeholder="Not (en sona yazılır)"></textarea>
+    <button class="main" onclick="saveOrder()">Siparişi Kaydet</button>
+  </div>
+</section>
 
 <!-- ADMIN LOGIN -->
-<div class="container hidden" id="adminLogin">
-  <h2>Yönetici Girişi</h2>
-  <input id="adminUser" placeholder="Kullanıcı adı">
-  <input id="adminPass" type="password" placeholder="Şifre">
-  <button class="main" onclick="adminLogin()">Giriş</button>
-</div>
+<section id="adminLogin">
+  <div class="card">
+    <h2>Yönetici Girişi</h2>
+    <input id="auser" placeholder="Kullanıcı">
+    <input id="apass" type="password" placeholder="Şifre">
+    <button class="main" onclick="login()">Giriş</button>
+  </div>
+</section>
 
 <!-- ADMIN -->
-<div class="container hidden" id="admin">
-  <h2>Geçmiş Siparişler</h2>
-  <div id="orderHistory"></div>
-</div>
+<section id="admin">
+  <div class="list">
+    <div class="card">
+      <h3>📚 Katalog Yönetimi</h3>
+      <input id="catName" placeholder="Katalog Adı">
+      <button class="main" onclick="addCatalog()">Ekle</button>
+      <div id="catList"></div>
+    </div>
 
-<!-- FIREBASE -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <div class="card">
+      <h3>🕓 Geçmiş Siparişler</h3>
+      <div id="orderList"></div>
+    </div>
+  </div>
+</section>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyB_uliTJMGnjbA65mlGo3Mu20A8w-5GFms",
-  authDomain: "dekorchu-siparis-bfe48.firebaseapp.com",
-  projectId: "dekorchu-siparis-bfe48",
-  storageBucket: "dekorchu-siparis-bfe48.firebasestorage.app",
-  messagingSenderId: "109206944615",
-  appId: "1:109206944615:web:6d15e84aabd910536a4dc2"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const catalogs=JSON.parse(localStorage.getItem("cats")||"[]");
+const orders=JSON.parse(localStorage.getItem("orders")||"[]");
 
 function show(id){
-  document.querySelectorAll(".container").forEach(c=>c.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==="admin") renderAdmin();
 }
 
-function goHouse(){
-  if(!custName.value || custPhone.value.length!==10 || !custPhone.value.startsWith("5")){
-    alert("Bilgileri doğru girin"); return;
+function nextRoom(){
+  if(!name.value||!phone.value.match(/^5\d{9}$/)){
+    alert("Bilgiler eksik");
+    return;
   }
-  show("house");
+  show("room");
 }
 
-function loadRooms(){
-  const map={
-    "1+1":["Salon","Mutfak","Banyo / WC"],
-    "2+1":["Salon","Yatak Odası","Çocuk Odası","Mutfak","Banyo / WC"],
-    "2.5+1":["Salon","Yatak Odası","Çocuk Odası","Misafir Odası","Mutfak","Banyo / WC"],
-    "3+1":["Salon","Yatak Odası","Çocuk Odası","Misafir Odası","Mutfak","Banyo / WC"],
-    "3.5+1":["Salon","Yatak Odası","Çocuk Odası","Misafir Odası","Çalışma Odası","Mutfak","Banyo / WC","Ebeveyn Banyosu"],
-    "4.5+1":["Salon","Yatak Odası","Çocuk Odası","Çocuk Odası 2","Misafir Odası","Çalışma Odası","Mutfak","Banyo / WC","Ebeveyn Banyosu"]
-  };
-  rooms.innerHTML="";
-  if(!houseType.value)return;
-  map[houseType.value].forEach(r=>{
-    rooms.innerHTML+=`
-      <div class="room"><b>${r}</b>
-        <div class="wall">
-          Katalog: <input placeholder="Katalog">
-          Kod: <input placeholder="Kağıt Kodu">
-        </div>
-      </div>`;
+function loadWalls(){
+  walls.innerHTML="";
+  catalogs.forEach((c,i)=>{
+    walls.innerHTML+=`
+      <label>Duvar ${i+1} – ${c}</label>
+      <select class="wallSel">
+        <option>${c}</option>
+      </select>
+    `;
   });
 }
 
 function saveOrder(){
-  db.collection("orders").add({
-    name:custName.value,
-    phone:custPhone.value,
-    house:houseType.value,
-    note:orderNote.value,
+  const sel=[...document.querySelectorAll(".wallSel")].map(s=>s.value);
+  orders.push({
+    name:name.value,
+    phone:phone.value,
+    room:roomSel.value,
+    walls:sel,
+    note:note.value,
     date:new Date().toLocaleString()
-  }).then(()=>{
-    alert("Sipariş kaydedildi");
-    location.reload();
+  });
+  localStorage.setItem("orders",JSON.stringify(orders));
+  alert("Kaydedildi");
+  location.reload();
+}
+
+function login(){
+  if(auser.value==="yonetici" && apass.value==="dekorchu"){
+    show("admin");
+  }else alert("Hatalı");
+}
+
+function addCatalog(){
+  if(catalogs.includes(catName.value)||!catName.value) return;
+  catalogs.push(catName.value);
+  localStorage.setItem("cats",JSON.stringify(catalogs));
+  renderAdmin();
+}
+
+function renderAdmin(){
+  catList.innerHTML="";
+  catalogs.forEach((c,i)=>{
+    catList.innerHTML+=`
+      <div class="item">${c}
+        <span onclick="delCat(${i})" style="float:right;color:red">Sil</span>
+      </div>`;
+  });
+
+  orderList.innerHTML="";
+  orders.forEach(o=>{
+    orderList.innerHTML+=`
+      <div class="item">
+        ${o.name}
+        <div class="small">${o.room} – ${o.walls.join(", ")}</div>
+      </div>`;
   });
 }
 
-function adminLogin(){
-  if(adminUser.value==="yönetici" && adminPass.value==="dekorchu"){
-    show("admin");
-    db.collection("orders").orderBy("date","desc")
-      .onSnapshot(s=>{
-        orderHistory.innerHTML="";
-        s.forEach(d=>{
-          const o=d.data();
-          orderHistory.innerHTML+=`
-            <div class="room">
-              <b>${o.name}</b> (${o.phone})<br>
-              ${o.house} – ${o.date}<br>
-              ${o.note||""}
-            </div>`;
-        });
-      });
-  } else alert("Hatalı giriş");
+function delCat(i){
+  catalogs.splice(i,1);
+  localStorage.setItem("cats",JSON.stringify(catalogs));
+  renderAdmin();
 }
 </script>
 </body>
