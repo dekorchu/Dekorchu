@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DEKORCHU</title>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <style>
 :root{
   --bg:#0b0b10;
@@ -12,81 +15,94 @@
   --gold:#d4af37;
   --text:#f5f5f5;
 }
+*{box-sizing:border-box;font-family:Segoe UI}
+body{margin:0;background:var(--bg);color:var(--text);overflow-x:hidden}
 
-*{box-sizing:border-box;font-family:Segoe UI,Arial}
-body{margin:0;background:var(--bg);color:var(--text);}
-
+/* ARKA PLAN */
 .pattern{
-  position:fixed;inset:0;
+  position:fixed;inset:0;z-index:-1;
   background:
-    radial-gradient(circle at 20% 30%, rgba(212,175,55,.12), transparent 40%),
-    repeating-linear-gradient(45deg, rgba(212,175,55,.06), rgba(212,175,55,.06) 1px, transparent 1px, transparent 50px);
-  animation:bg 40s linear infinite;
-  z-index:-1;
+    radial-gradient(circle at 20% 30%, rgba(212,175,55,.15), transparent 40%),
+    repeating-linear-gradient(45deg, rgba(212,175,55,.05), transparent 50px);
+  animation:bg 60s linear infinite;
 }
-@keyframes bg{to{background-position:800px 800px}}
+@keyframes bg{to{background-position:1000px 1000px}}
 
+/* HEADER */
 header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:18px 26px;border-bottom:1px solid #222;
+  display:flex;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid #222;
 }
 .logo{
-  font-size:34px;font-weight:800;color:var(--gold);
-  animation:glow 3s ease-in-out infinite;
+  font-size:30px;color:var(--gold);
+  animation:glow 3s infinite;
 }
 @keyframes glow{
-  0%,100%{text-shadow:0 0 15px var(--gold)}
-  50%{text-shadow:0 0 35px var(--gold)}
+  0%,100%{text-shadow:0 0 10px var(--gold)}
+  50%{text-shadow:0 0 30px var(--gold)}
 }
 
 nav button{
-  background:transparent;border:1px solid var(--gold);
-  color:var(--gold);padding:8px 14px;
-  border-radius:8px;cursor:pointer;margin-left:8px;
+  border:1px solid var(--gold);
+  background:transparent;color:var(--gold);
+  padding:6px 12px;border-radius:8px;
+  cursor:pointer;transition:.3s;
 }
 nav button:hover{background:var(--gold);color:#000}
 
+/* CARD */
 .container{
-  max-width:540px;margin:30px auto;
-  background:var(--panel);padding:24px;
-  border-radius:16px;
-  box-shadow:0 0 25px rgba(0,0,0,.6);
+  max-width:520px;margin:25px auto;
+  background:var(--panel);
+  padding:20px;border-radius:14px;
+  animation:fade .4s ease;
 }
+@keyframes fade{from{opacity:0;transform:translateY(10px)}}
+
 .hidden{display:none}
 
+/* INPUT */
 input,select,textarea{
-  width:100%;margin-top:10px;padding:12px;
-  border-radius:10px;background:#101018;
-  border:1px solid #333;color:white;
+  width:100%;margin-top:10px;
+  padding:10px;border-radius:8px;
+  background:#101018;border:1px solid #333;color:#fff;
 }
 
+/* BUTTON */
 button.main{
-  width:100%;margin-top:18px;padding:15px;
-  background:var(--gold);color:#000;
-  border:none;border-radius:12px;
-  font-size:16px;cursor:pointer;
-  box-shadow:0 0 18px rgba(212,175,55,.6);
+  width:100%;margin-top:14px;
+  padding:12px;border-radius:10px;
+  background:linear-gradient(135deg,#f5d76e,#d4af37);
+  border:none;color:#000;cursor:pointer;
+  box-shadow:0 0 15px rgba(212,175,55,.5);
+  transition:.3s;
 }
-button.main:hover{box-shadow:0 0 30px rgba(212,175,55,.9)}
-
-.room{margin-top:14px;padding:14px;background:#1b1b26;border-radius:12px}
-.wall{margin-top:8px;padding:8px;background:#20202b;border-radius:8px}
+button.main:hover{
+  transform:scale(1.03);
+  box-shadow:0 0 30px rgba(212,175,55,.9);
+}
 
 .small-btn{
-  margin-top:8px;
-  background:transparent;border:1px solid var(--gold);
-  color:var(--gold);padding:6px 10px;
-  border-radius:6px;cursor:pointer;
+  border:1px solid var(--gold);
+  background:transparent;color:var(--gold);
+  padding:4px 8px;border-radius:6px;
+  cursor:pointer;margin-top:5px;
 }
-.small-btn:hover{background:var(--gold);color:#000}
 
-.admin-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}
-@media(max-width:800px){
-  .admin-grid{grid-template-columns:1fr}
+/* BLOKLAR */
+.room{margin-top:10px;padding:10px;background:#1b1b26;border-radius:10px}
+.wall{margin-top:6px;padding:6px;background:#20202b;border-radius:6px}
+
+/* TOAST */
+#toast{
+  position:fixed;
+  bottom:20px;left:50%;
+  transform:translateX(-50%);
+  background:var(--gold);
+  color:#000;padding:10px 18px;
+  border-radius:8px;
+  display:none;
+  box-shadow:0 0 20px rgba(212,175,55,.8);
 }
 </style>
 </head>
@@ -102,168 +118,153 @@ button.main:hover{box-shadow:0 0 30px rgba(212,175,55,.9)}
   </nav>
 </header>
 
+<div id="toast"></div>
+
 <!-- SİPARİŞ -->
 <div class="container" id="order">
-  <h2>Müşteri Bilgileri</h2>
+  <h3>Müşteri</h3>
   <input id="custName" placeholder="Ad Soyad">
-  <input id="custPhone" maxlength="10"
-    placeholder="5XXXXXXXXX (0 yazmayın)"
+  <input id="custPhone" maxlength="10" placeholder="5XXXXXXXXX"
     oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-  <button class="main" onclick="goHouse()">Devam Et</button>
+  <button class="main" onclick="goHouse()">Devam</button>
 </div>
 
 <!-- EV -->
 <div class="container hidden" id="house">
-  <h2>Evin Kaç Artı Bir?</h2>
   <select id="houseType" onchange="loadRooms()">
-    <option value="">Seçiniz</option>
-    <option>1+1</option><option>2+1</option><option>2.5+1</option>
-    <option>3+1</option><option>3.5+1</option><option>4.5+1</option>
+    <option value="">Ev tipi</option>
+    <option>1+1</option><option>2+1</option><option>3+1</option>
   </select>
-
   <div id="rooms"></div>
-
-  <textarea id="orderNote" placeholder="Genel Sipariş Notu"></textarea>
-  <button class="main" onclick="saveOrder()">Siparişi Kaydet</button>
+  <button class="main" onclick="saveOrder()">Kaydet</button>
 </div>
 
-<!-- ADMIN LOGIN -->
+<!-- ADMIN -->
 <div class="container hidden" id="adminLogin">
-  <h2>Yönetici Girişi</h2>
-  <input id="adminUser" placeholder="Kullanıcı adı">
+  <input id="adminUser" placeholder="Kullanıcı">
   <input id="adminPass" type="password" placeholder="Şifre">
   <button class="main" onclick="adminLogin()">Giriş</button>
 </div>
 
-<!-- ADMIN -->
 <div class="container hidden" id="admin">
-  <div class="admin-grid">
+  <h3>Katalog</h3>
+  <input id="catalogName">
+  <button class="main" onclick="addCatalog()">Ekle</button>
+  <div id="catalogList"></div>
 
-    <div>
-      <h2>Katalog Yönetimi</h2>
-      <input id="catalogName" placeholder="Katalog Adı">
-      <button class="main" onclick="addCatalog()">Katalog Ekle</button>
-      <div id="catalogList"></div>
-    </div>
-
-    <div>
-      <h2>Geçmiş Siparişler</h2>
-      <div id="orderHistory"></div>
-    </div>
-
-  </div>
+  <h3>Siparişler</h3>
+  <div id="orderHistory"></div>
 </div>
 
 <script>
-let catalogs=JSON.parse(localStorage.getItem("catalogs")||"[]");
-let orders=JSON.parse(localStorage.getItem("orders")||"[]");
+firebase.initializeApp({
+  apiKey:"AIzaSyB_uliTJMGnjbA65mlGo3Mu20A8w-5GFms",
+  authDomain:"dekorchu-siparis-bfe48.firebaseapp.com",
+  projectId:"dekorchu-siparis-bfe48"
+});
+const db=firebase.firestore();
 
+let catalogs=[];
+
+/* TOAST */
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.innerText=msg;
+  t.style.display="block";
+  setTimeout(()=>t.style.display="none",2000);
+}
+
+/* NAV */
 function show(id){
   document.querySelectorAll(".container").forEach(c=>c.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
 }
 
+/* DEVAM */
 function goHouse(){
-  const n=custName.value.trim();
-  const p=custPhone.value.trim();
-  if(n.length<3){alert("Ad Soyad hatalı");return;}
-  if(!/^5\d{9}$/.test(p)){alert("Telefon 5XXXXXXXXX formatında");return;}
+  if(!/^5\d{9}$/.test(custPhone.value)) return toast("Telefon hatalı");
   show("house");
 }
 
+/* ODALAR */
 function loadRooms(){
-  const map={
-    "1+1":["Salon","Mutfak","Banyo"],
-    "2+1":["Salon","Yatak Odası","Çocuk Odası","Mutfak","Banyo"],
-    "2.5+1":["Salon","Yatak Odası","Çocuk Odası","Misafir Odası","Mutfak","Banyo"],
-    "3+1":["Salon","Yatak Odası","Çocuk Odası","Misafir Odası","Mutfak","Banyo"],
-    "3.5+1":["Salon","Yatak Odası","Çocuk Odası","Misafir Odası","Çalışma Odası","Mutfak","Banyo","Ebeveyn Banyosu"],
-    "4.5+1":["Salon","Yatak Odası","Çocuk Odası","Çocuk Odası 2","Misafir Odası","Çalışma Odası","Mutfak","Banyo","Ebeveyn Banyosu"]
-  };
   rooms.innerHTML="";
-  map[houseType.value]?.forEach(r=>{
+  ["Salon","Yatak Odası","Mutfak"].forEach(r=>{
     rooms.innerHTML+=`
-      <div class="room">
-        <strong>${r}</strong>
-        <div class="walls"></div>
-        <button class="small-btn" onclick="addWall(this)">+ Duvar Ekle</button>
-      </div>`;
+    <div class="room">
+      <b>${r}</b>
+      <div class="walls"></div>
+      <button class="small-btn" onclick="addWall(this)">+ Duvar</button>
+    </div>`;
   });
 }
 
+/* DUVAR */
 function addWall(btn){
-  const w=btn.previousElementSibling;
-  if(w.children.length>=4)return alert("Max 4 duvar");
+  let w=btn.previousElementSibling;
+  let options=catalogs.map(c=>`<option>${c}</option>`).join("");
   w.innerHTML+=`
     <div class="wall">
-      Duvar ${w.children.length+1}
-      <select>${catalogs.map(c=>`<option>${c}</option>`).join("")}</select>
-      <input placeholder="Kağıt Kodu">
+      <select>${options}</select>
+      <input placeholder="Kod">
     </div>`;
 }
 
-function saveOrder(){
-  const order={
-    name:custName.value,
-    phone:custPhone.value,
-    note:orderNote.value,
-    date:new Date().toLocaleString(),
-    rooms:[]
-  };
-  document.querySelectorAll(".room").forEach(r=>{
-    const rn=r.querySelector("strong").innerText;
-    r.querySelectorAll(".wall").forEach(w=>{
-      order.rooms.push({
-        room:rn,
-        catalog:w.querySelector("select").value,
-        code:w.querySelector("input").value
-      });
-    });
-  });
-  orders.push(order);
-  localStorage.setItem("orders",JSON.stringify(orders));
-  alert("Kaydedildi");
-  location.reload();
-}
-
-function adminLogin(){
-  if(adminUser.value==="yönetici" && adminPass.value==="dekorchu"){
-    show("admin");renderCatalogs();renderOrders();
-  } else alert("Hatalı");
-}
-
+/* KATALOG EKLE */
 function addCatalog(){
-  const n=catalogName.value.trim();
-  if(!n||catalogs.includes(n))return alert("Geçersiz");
-  catalogs.push(n);
-  localStorage.setItem("catalogs",JSON.stringify(catalogs));
-  renderCatalogs();
+  let name=catalogName.value.trim();
+  if(!name) return toast("Boş");
+  if(catalogs.includes(name)) return toast("Zaten var");
+
+  db.collection("catalog").add({name});
+  catalogName.value="";
+  toast("Eklendi");
 }
 
-function renderCatalogs(){
+/* KATALOG LİSTE */
+db.collection("catalog").onSnapshot(snap=>{
   catalogList.innerHTML="";
-  catalogs.forEach((c,i)=>{
+  catalogs=[];
+  snap.forEach(doc=>{
+    catalogs.push(doc.data().name);
     catalogList.innerHTML+=`
-      <div class="room">${c}
-        <button class="small-btn" onclick="catalogs.splice(${i},1);localStorage.setItem('catalogs',JSON.stringify(catalogs));renderCatalogs()">Sil</button>
+      <div class="room">
+        ${doc.data().name}
+        <button class="small-btn" onclick="db.collection('catalog').doc('${doc.id}').delete()">Sil</button>
       </div>`;
   });
+});
+
+/* SİPARİŞ */
+function saveOrder(){
+  db.collection("orders").add({
+    name:custName.value,
+    phone:custPhone.value,
+    date:new Date().toLocaleString()
+  });
+  toast("Kaydedildi ✔");
 }
 
-function renderOrders(){
+/* SİPARİŞ LİSTE */
+db.collection("orders").onSnapshot(snap=>{
   orderHistory.innerHTML="";
-  orders.forEach((o,i)=>{
-    let html=`<div class="room">
-      <strong>${o.name}</strong><br>${o.phone}<br>${o.date}`;
-    o.rooms.forEach(r=>{
-      html+=`<div class="wall">${r.room} → ${r.catalog} / ${r.code}</div>`;
-    });
-    html+=`
-      <button class="small-btn" onclick="orders.splice(${i},1);localStorage.setItem('orders',JSON.stringify(orders));renderOrders()">Siparişi Sil</button>
-    </div>`;
-    orderHistory.innerHTML+=html;
+  snap.forEach(doc=>{
+    let o=doc.data();
+    orderHistory.innerHTML+=`
+      <div class="room">
+        ${o.name}<br>${o.phone}
+        <button class="small-btn" onclick="db.collection('orders').doc('${doc.id}').delete()">Sil</button>
+      </div>`;
   });
+});
+
+/* ADMIN */
+function adminLogin(){
+  if(adminUser.value==="yönetici" && adminPass.value==="dekorchu"){
+    show("admin");
+  }else toast("Hatalı giriş");
 }
 </script>
+
 </body>
 </html>
